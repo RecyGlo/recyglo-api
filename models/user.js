@@ -20,7 +20,7 @@ const UserSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['SUPER ADMIN', 'ADMIN', 'OPERATION MANAGER', 'OPERATION', 'FINANNCE OFFICE', 'USER', 'DRIVER'],
+      enum: ['ADMIN', 'USER', 'DRIVER', 'OPERATION'],
       default: 'USER',
     },
     phoneNumber: {

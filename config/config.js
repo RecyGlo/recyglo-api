@@ -3,8 +3,9 @@ const env = process.env.NODE_ENV || 'development';
 const config = {
   development: {
     db:
-      'mongodb+srv://t0e:i8Y8dYyTJfyZonms@b2b-0az6a.mongodb.net/recyglo_b2b',
+      'mongodb+srv://t0e:UoMmBBOATnRMcRez@b2b-0az6a.mongodb.net/recyglo_b2b',
       // 'mongodb://api.test.recyglo.info:27017/recyglo_b2b',
+      // "mongodb://dbAdmin:Xnr3hRV8sk@api.test.recyglo.info:27017/recyglo_b2b?authSource=recyglo_b2b",
     API_VERSION: 'api/v1',
     jwtSecret: 'recyglomm',
     refershTokenSecret: 'R3CYgl0mm',
@@ -15,8 +16,9 @@ const config = {
   },
   production: {
     db:
-      'mongodb+srv://t0e:i8Y8dYyTJfyZonms@b2b-0az6a.mongodb.net/recyglo_b2b',
+      'mongodb+srv://t0e:UoMmBBOATnRMcRez@b2b-0az6a.mongodb.net/recyglo_b2b',
       // 'mongodb://api.test.recyglo.info:27017/recyglo_b2b',
+      // "mongodb://dbAdmin:Xnr3hRV8sk@api.test.recyglo.info:27017/recyglo_b2b?authSource=recyglo_b2b",
     API_VERSION: 'api/v1',
     jwtSecret: 'recyglomm',
     refershTokenSecret: 'R3CYgl0mm',

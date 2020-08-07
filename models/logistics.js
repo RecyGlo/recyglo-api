@@ -49,6 +49,9 @@ const LogisticsSchema = new mongoose.Schema(
     wayNumber: {
       type: Number,
     },
+    wayType: {
+      type: String,
+    },
     remark: {
       type: String,
     },

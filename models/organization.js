@@ -53,6 +53,10 @@ const OrganizationSchema = new Schema(
       type: String,
       default: 'ACTIVE',
     },
+    location: {
+      lng: {type: Number},
+      lat: {type: Number},
+    }
   },
   {
     timestamps: true,

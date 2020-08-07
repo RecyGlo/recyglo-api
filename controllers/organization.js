@@ -87,6 +87,10 @@ const ADD_NEW_ORGANIZATION = async (req, res) => {
       startDate: joi.date(),
       endDate: joi.date(),
     })),
+    location: joi.object().keys({
+      lng: joi.number(),
+      lat: joi.number(), 
+    }),
   };
 
   const { error } = joi.validate(body, schema);
@@ -102,7 +106,7 @@ const ADD_NEW_ORGANIZATION = async (req, res) => {
     if (email) {
       const emailExist = await Organization.find({ email });
       if (emailExist && emailExist.length) {
-        return res.status(409).json('Organization already exists');
+        return res.status(409).json('Email already exists');
       }
     }
 
@@ -115,9 +119,7 @@ const ADD_NEW_ORGANIZATION = async (req, res) => {
   }
   const err = [];
   err.push({ msg: error.message });
-  return res.status(500).send({
-    error: err,
-  });
+  return res.status(500).send(error.message);
 };
 
 const UPDATE_ORGANIZATION = (req, res) => {
@@ -143,6 +145,10 @@ const UPDATE_ORGANIZATION = (req, res) => {
       startDate: joi.date(),
       endDate: joi.date(),
     })),
+    location: joi.object().keys({
+      lng: joi.number(),
+      lat: joi.number(), 
+    }),
   };
 
   const { error } = joi.validate(body, schema);

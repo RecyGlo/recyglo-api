@@ -7,6 +7,8 @@ const awsController = require('../controllers/helper');
 
 router.post('/login', authController.LOG_IN);
 router.post('/refresh_token', authController.REFRESH_TOKEN);
+router.post('/send_password_reset_link', authController.SEND_PASSWORD_RESET_LINK);
+router.post('/reset_password/:link', authController.RESET_PASSWORD);
 router.get('/', authController.checkAuth, miscController.GREET);
 router.post('/upload', authController.checkAuth, awsController.UPLOAD_TO_S3);
 router.get('/dashboard', authController.checkAuth, miscController.GET_DASHBOARD_DATA);
@@ -15,6 +17,8 @@ router.get('/dashboard/trend', authController.checkAuth, miscController.GET_TREN
 router.get('/contract_expries', authController.checkAuth, miscController.GET_CONTRACT_EXPRIES);
 router.get('/wastes', authController.checkAuth, miscController.GET_WASTE_DATA);
 router.get('/wastes/organizations/:id', authController.checkAuth, miscController.GET_TOTAL_WASTE_BY_ORGANIZATION);
+router.get('/pickups/organizations/:id', authController.checkAuth, miscController.GET_TOTAL_PICKUPS_BY_ORGANIZATION);
+router.get('/contracts/organizations/:id', authController.checkAuth, miscController.GET_CONTRACT_DURATION_BY_ORGANIZATION);
 router.get('/wastes/monthly/:id', authController.checkAuth, miscController.GET_WASTE_DATA_BY_ORGANIZATION);
 router.get('/wastes/monthly', authController.checkAuth, miscController.GET_MONTHLY_COLLECTED_WASTE_DATA);
 

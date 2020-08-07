@@ -22,6 +22,10 @@ const logisticsRouter = require('./routes/logistics');
 const trainingRouter = require('./routes/trainings');
 const serviceRouter = require('./routes/services');
 const paymentRouter = require('./routes/payment');
+const quizRouter = require('./routes/quiz');
+const userAnsQuizRouter = require('./routes/userAnsQuiz');
+const trainingSlideRouter = require('./routes/trainingSlide');
+const carbonfootprintRouter = require('./routes/carbonfootprint');
 
 // eslint-disable-next-line no-var
 var tokenList = {};
@@ -99,6 +103,10 @@ app.use('/logistics', logisticsRouter);
 app.use('/trainings', trainingRouter);
 app.use('/services', serviceRouter);
 app.use('/payment', paymentRouter);
+app.use('/quiz', quizRouter);
+app.use('/user_ans_quiz', userAnsQuizRouter);
+app.use('/training_slide', trainingSlideRouter);
+app.use('/carbonfootprint', carbonfootprintRouter);
 
 // 404
 app.all('*', (req, res) => {

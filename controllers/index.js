@@ -41,7 +41,7 @@ const GET_DASHBOARD_DATA = async (req, res) => {
 const GET_WASTE_DATA = async (req, res) => {
   try {
     const logistics = await Logistics.find({ items: { $ne: [] } }, { items: 1, _id: 0 });
-    // const zlogistics = await Logistics.find(
+    // const logistics = await Logistics.find(
     //   {
     //     items: {
     //       $eq: {
@@ -95,13 +95,27 @@ const GET_WASTE_DATA = async (req, res) => {
 const GET_TOTAL_WASTE_BY_ORGANIZATION = async (req, res) => {
   try {
     const organizationId = req.params.id;
-    const logistics = await Logistics.find(
-      {
-        organizationId: ObjectId(organizationId),
-        items: { $ne: [] },
-      },
-      { items: 1 },
-    );
+    let { duration } = req.query;
+    let logistics = null;
+    if (duration) {
+      duration = JSON.parse(duration);
+      logistics = await Logistics.find(
+        {
+          organizationId: ObjectId(organizationId),
+          items: { $ne: [] },
+          pickUpTime: { $gt: duration.from, $lt: duration.to },
+        },
+        { items: 1, pickUpTime: 1 },
+      ).sort({ pickUpTime: 1 });
+    } else {
+      logistics = await Logistics.find(
+        {
+          organizationId: ObjectId(organizationId),
+          items: { $ne: [] },
+        },
+        { items: 1, pickUpTime: 1 },
+      ).sort({ pickUpTime: 1 });
+    }
     let items = [];
     for (let i = 0; i < logistics.length; i++) {
       items = items.concat(logistics[i].items);
@@ -131,6 +145,64 @@ const GET_TOTAL_WASTE_BY_ORGANIZATION = async (req, res) => {
 
     return res.status(200).send({
       data: reportData,
+      message: 'Success',
+    });
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+};
+
+const GET_TOTAL_PICKUPS_BY_ORGANIZATION = async (req, res) => {
+  try {
+    const organizationId = req.params.id;
+    let { duration } = req.query;
+    let logistics = null;
+    if (duration) {
+      duration = JSON.parse(duration);
+      logistics = await Logistics.countDocuments(
+        {
+          organizationId: ObjectId(organizationId),
+          status: 'COMPLETED',
+          pickUpTime: { $gt: duration.from, $lt: duration.to },
+        },
+      );
+    } else {
+      logistics = await Logistics.countDocuments(
+        {
+          organizationId: ObjectId(organizationId),
+          status: 'COMPLETED',
+        },
+      );
+    }
+    
+    return res.status(200).send({
+      data: logistics,
+      message: 'Success',
+    });
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+};
+
+const GET_CONTRACT_DURATION_BY_ORGANIZATION = async (req, res) => {
+  try {
+    const organizationId = req.params.id;
+    let contracts = await Organization.findOne(
+      {
+        _id: ObjectId(organizationId),
+      },
+      {
+        contracts: 1, _id: 0
+      }
+    );
+    contracts = contracts.contracts;
+    const contractStartDate = contracts[0].startDate;
+    const contractEndDate = contracts[contracts.length - 1].endDate;
+    return res.status(200).send({
+      data: {
+        contractStartDate: contractStartDate,
+        contractEndDate: contractEndDate,
+      },
       message: 'Success',
     });
   } catch (error) {
@@ -256,20 +328,30 @@ const GET_MONTHLY_COLLECTED_WASTE_DATA = async (req, res) => {
     const data = [];
     const types = [];
 
+    const wastes = {
+      Papers: 'Paper',
+      Plastics: 'Plastic',
+      Cans: 'Can',
+      Glasses: 'Glass',
+      'E-waste': 'E-waste',
+      Organic: 'Organic',
+    };
+
     Object.keys(monthlyData).forEach((item) => {
       let date = new Date(monthlyData[item]._id.year, monthlyData[item]._id.month - 1);
       date = moment(date).format('MMMM Y');
       const index = data.findIndex(x => String(x.month) === String(date));
+      const type = wastes[monthlyData[item]._id.type];
       if (index === -1) {
         const tmp = {};
         tmp.month = date;
-        tmp[monthlyData[item]._id.type] = monthlyData[item].total;
+        tmp[type] = monthlyData[item].total;
         data.push(tmp);
       } else {
-        data[index][monthlyData[item]._id.type] = monthlyData[item].total;
+        data[index][type] = monthlyData[item].total;
       }
-      if (!types.includes(monthlyData[item]._id.type)) {
-        types.push(monthlyData[item]._id.type);
+      if (!types.includes(type)) {
+        types.push(type);
       }
     });
 
@@ -299,56 +381,114 @@ const GET_WASTE_DATA_BY_ORGANIZATION = async (req, res) => {
   try {
     // const logistics = await Logistics.find({ items: { $ne: [] } }, { items: 1, _id: 0 });
     const organizationId = req.params.id;
-    let organizationData = await Logistics.aggregate([
-      { $match: { organizationId: ObjectId(organizationId) } },
-      { $unwind: '$items' },
-      {
-        $project: {
-          month: {
-            $month: '$pickUpTime',
+    let { duration } = req.query;
+    let organizationData = null;
+    if (duration) {
+      duration = JSON.parse(duration);
+      organizationData = await Logistics.aggregate([
+        { $match: { organizationId: ObjectId(organizationId) } },
+        { $match: { pickUpTime: { $gte: new Date(duration.from), $lt: new Date(duration.to) } }},
+        { $unwind: '$items' },
+        {
+          $project: {
+            month: {
+              $month: '$pickUpTime',
+            },
+            year: {
+              $year: '$pickUpTime',
+            },
+            items: '$items',
+            organization: '$organizationId',
           },
-          year: {
-            $year: '$pickUpTime',
-          },
-          items: '$items',
-          organization: '$organizationId',
         },
-      },
-      {
-        $group: {
-          _id: {
-            type: '$items.productType',
-            month: '$month',
-            year: '$year',
-            organization: '$organization',
+        {
+          $group: {
+            _id: {
+              type: '$items.productType',
+              month: '$month',
+              year: '$year',
+              organization: '$organization',
+            },
+            total: { $sum: '$items.quantity' },
           },
-          total: { $sum: '$items.quantity' },
         },
-      },
-      {
-        $group: {
-          _id: '$_id.organization',
-          data: {
-            $addToSet:
-            {
-              total: '$total',
-              type: '$_id.type',
-              month: '$_id.month',
-              year: '$_id.year',
+        {
+          $group: {
+            _id: '$_id.organization',
+            data: {
+              $addToSet:
+              {
+                total: '$total',
+                type: '$_id.type',
+                month: '$_id.month',
+                year: '$_id.year',
+              },
             },
           },
         },
-      },
-      {
-        $lookup:
-          {
-            from: 'organizations',
-            localField: '_id',
-            foreignField: '_id',
-            as: 'organization',
+        {
+          $lookup:
+            {
+              from: 'organizations',
+              localField: '_id',
+              foreignField: '_id',
+              as: 'organization',
+            },
+        },
+      ]);
+      console.log(organizationData);
+    } else {
+      organizationData = await Logistics.aggregate([
+        { $match: { organizationId: ObjectId(organizationId) } },
+        { $unwind: '$items' },
+        {
+          $project: {
+            month: {
+              $month: '$pickUpTime',
+            },
+            year: {
+              $year: '$pickUpTime',
+            },
+            items: '$items',
+            organization: '$organizationId',
           },
-      },
-    ]);
+        },
+        {
+          $group: {
+            _id: {
+              type: '$items.productType',
+              month: '$month',
+              year: '$year',
+              organization: '$organization',
+            },
+            total: { $sum: '$items.quantity' },
+          },
+        },
+        {
+          $group: {
+            _id: '$_id.organization',
+            data: {
+              $addToSet:
+              {
+                total: '$total',
+                type: '$_id.type',
+                month: '$_id.month',
+                year: '$_id.year',
+              },
+            },
+          },
+        },
+        {
+          $lookup:
+            {
+              from: 'organizations',
+              localField: '_id',
+              foreignField: '_id',
+              as: 'organization',
+            },
+        },
+      ]);
+    }
 
     // eslint-disable-next-line prefer-destructuring
     organizationData = organizationData[0];
@@ -442,11 +582,11 @@ const GET_GROWTH_RATE_DATA = async (req, res) => {
 
     const present = await Organization.countDocuments({});
     const past = await Organization.countDocuments({
-      startDate: {
+      'contracts.0.startDate': {
         $lt: date.toISOString(),
       },
     });
-    const organizationGrowthRate = (present - past) / past * 100;
+    const organizationGrowthRate = ((present - past) / past) * 100;
     return res.status(200).send({
       data: {
         organizations: organizationGrowthRate.toFixed(2),
@@ -512,4 +652,6 @@ module.exports = {
   GET_GROWTH_RATE_DATA,
   GET_TRENDLINE_DATA,
   UPLOAD_TO_S3,
+  GET_TOTAL_PICKUPS_BY_ORGANIZATION,
+  GET_CONTRACT_DURATION_BY_ORGANIZATION,
 };

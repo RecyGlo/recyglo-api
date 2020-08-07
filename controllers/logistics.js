@@ -55,7 +55,7 @@ const GET_LOGISTICS_BY_ORGANIZATION_FOR_REPORT = async (req, res) => {
       .populate('organizationId')
       .populate('vehicle.driver')
       .populate('operationTeam')
-      .sort({ createdAt: -1 })
+      .sort({ pickUpTime: 1 })
       .lean()
       .exec();
     return res.status(200).send({
@@ -106,6 +106,7 @@ const ADD_NEW_LOGISTICS = async (req, res) => {
       driver: joi.string(),
     }),
     wayNumber: joi.number(),
+    wayType: joi.string(),
     pickUpType: joi.string(),
     operationTeam: [joi.string()],
     pickUpTime: joi.string(),
@@ -149,6 +150,7 @@ const UPDATE_LOGISTIC = (req, res) => {
       driver: joi.string(),
     }),
     wayNumber: joi.number(),
+    wayType: joi.string(),
     operationTeam: joi.array().items(joi.string()),
     pickUpType: joi.string(),
     pickUpTime: joi.string(),

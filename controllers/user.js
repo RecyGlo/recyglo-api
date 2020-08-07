@@ -110,7 +110,7 @@ const CREATE_USER = async (req, res) => {
       .string()
       .email()
       .required(),
-    phoneNumber: joi.string().required(),
+    phoneNumber: joi.string(),
     profileImage: joi.string(),
     type: joi.string().required(),
     organizationId: joi.string(),
@@ -123,15 +123,15 @@ const CREATE_USER = async (req, res) => {
       const userType = body.type;
       const password = 'recyglo';
       const emailExist = await User.find({ email });
-      const phoneNumberExist = await User.find({ phoneNumber });
+      // const phoneNumberExist = await User.find({ phoneNumber });
 
       if (emailExist && emailExist.length) {
         return res.status(409).json('Email address already exist');
       }
 
-      if (phoneNumberExist && phoneNumberExist.length) {
-        return res.status(409).json('Phone Number already exist');
-      }
+      // if (phoneNumberExist && phoneNumberExist.length) {
+      //   return res.status(409).json('Phone Number already exist');
+      // }
 
       if (userType === 3 && organizationId.length === 0) {
         // no need to check type using ===
