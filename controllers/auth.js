@@ -47,7 +47,7 @@ const checkAuth = (req, res, next) => {
     next();
   } catch (error) {
     return res.status(401).json({
-      message: 'Auth Failed',
+      message: 'You do not have access to the API',
     });
   }
 };
