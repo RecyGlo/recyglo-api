@@ -5,9 +5,9 @@
 /* eslint-disable no-param-reassign */
 // const jwt = require('jsonwebtoken');
 // const config = require('../config/config');
-const moment = require('moment');
-const joi = require('joi');
-const Organization = require('../models/organization');
+const moment = require("moment");
+const joi = require("joi");
+const Organization = require("../models/organization");
 
 const GET_ALL_ORGANIZATIONS = async (req, res) => {
   try {
@@ -19,12 +19,16 @@ const GET_ALL_ORGANIZATIONS = async (req, res) => {
     organizations.map((organization) => {
       if (organization.contract) {
         organization.contracts.map((contract) => {
-          contract.startDate = moment(contract.startDate).format('D MMMM YYYY');
-          contract.endDate = moment(contract.endDate).format('D MMMM YYYY');
+          contract.startDate = moment(contract.startDate).format("D MMMM YYYY");
+          contract.endDate = moment(contract.endDate).format("D MMMM YYYY");
         });
       }
-      organization.startDate = moment(organization.startDate).format('DD-MM-YYYY');
-      organization.expiredDate = moment(organization.expiredDate).format('DD-MM-YYYY');
+      organization.startDate = moment(organization.startDate).format(
+        "DD-MM-YYYY"
+      );
+      organization.expiredDate = moment(organization.expiredDate).format(
+        "DD-MM-YYYY"
+      );
     });
 
     // organizations.map((organization) => {
@@ -35,8 +39,25 @@ const GET_ALL_ORGANIZATIONS = async (req, res) => {
     // });
     return res.status(200).send({
       data: organizations,
-      message: 'Success',
+      message: "Success",
     });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+const GET_ALL_LOCATIONS = async (req, res) => {
+  try {
+    const organizations = await Organization.find(
+      {},
+      "_id name address location"
+    );
+    return res.status(200).send({
+      data: organizations,
+      message: "Success",
+    });
+
+    // eslint-disable-next-line array-callback-return
   } catch (error) {
     res.status(500).json(error);
   }
@@ -51,16 +72,36 @@ const GET_SPECIFIC_ORGANIZATION = async (req, res) => {
       .exec();
     if (organization.contracts) {
       organization.contracts.map((contract) => {
-        contract.startDate = moment(contract.startDate).format('D MMMM YYYY');
-        contract.endDate = moment(contract.endDate).format('D MMMM YYYY');
+        contract.startDate = moment(contract.startDate).format("D MMMM YYYY");
+        contract.endDate = moment(contract.endDate).format("D MMMM YYYY");
       });
     }
     return res.status(200).send({
       data: organization,
-      message: 'Success',
+      message: "Success",
     });
   } catch (error) {
-    if (error.name && error.name === 'CastError') {
+    if (error.name && error.name === "CastError") {
+      return res.sendStatus(404);
+    }
+    res.status(500).json(error);
+  }
+};
+
+const GET_SPECIFIC_LOCATION = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const organization = await Organization.findOne(
+      { _id: id },
+      "_id name address location"
+    );
+
+    return res.status(200).send({
+      data: organization,
+      message: "Success",
+    });
+  } catch (error) {
+    if (error.name && error.name === "CastError") {
       return res.sendStatus(404);
     }
     res.status(500).json(error);
@@ -83,37 +124,38 @@ const ADD_NEW_ORGANIZATION = async (req, res) => {
     expiredDate: joi.date(),
     companyType: joi.string().required(),
     logo: joi.string(),
-    contracts: joi.array().items(joi.object().keys({
-      startDate: joi.date(),
-      endDate: joi.date(),
-    })),
+    contracts: joi.array().items(
+      joi.object().keys({
+        startDate: joi.date(),
+        endDate: joi.date(),
+      })
+    ),
     location: joi.object().keys({
       lng: joi.number(),
-      lat: joi.number(), 
+      lat: joi.number(),
     }),
   };
 
   const { error } = joi.validate(body, schema);
 
-
   if (!error) {
     const { name, email } = body;
     const organizationExist = await Organization.find({ name });
     if (organizationExist && organizationExist.length) {
-      return res.status(409).json('Organization already exists');
+      return res.status(409).json("Organization already exists");
     }
 
     if (email) {
       const emailExist = await Organization.find({ email });
       if (emailExist && emailExist.length) {
-        return res.status(409).json('Email already exists');
+        return res.status(409).json("Email already exists");
       }
     }
 
     const newOrganization = new Organization(req.body);
     newOrganization.save();
     return res.status(201).send({
-      message: 'Successfully created a new organization',
+      message: "Successfully created a new organization",
       data: newOrganization,
     });
   }
@@ -140,14 +182,16 @@ const UPDATE_ORGANIZATION = (req, res) => {
     expiredDate: joi.date(),
     status: joi.string(),
     logo: joi.string(),
-    contracts: joi.array().items(joi.object().keys({
-      _id: joi.string(),
-      startDate: joi.date(),
-      endDate: joi.date(),
-    })),
+    contracts: joi.array().items(
+      joi.object().keys({
+        _id: joi.string(),
+        startDate: joi.date(),
+        endDate: joi.date(),
+      })
+    ),
     location: joi.object().keys({
       lng: joi.number(),
-      lat: joi.number(), 
+      lat: joi.number(),
     }),
   };
 
@@ -156,7 +200,7 @@ const UPDATE_ORGANIZATION = (req, res) => {
   if (!error) {
     Organization.findOneAndUpdate(query, body, { upsert: false }, (err) => {
       if (err) return res.send(500, { error: err });
-      return res.send('Successfully updated');
+      return res.send("Successfully updated");
     });
   } else {
     res.send(500, { error });
@@ -167,13 +211,15 @@ const DELETE_ORGANIZATION = async (req, res) => {
   const organizationId = req.params.id;
   Organization.findByIdAndDelete(organizationId, (err) => {
     if (err) return res.send(500, { error: err });
-    return res.send('Successfully deleted');
+    return res.send("Successfully deleted");
   });
 };
 
 module.exports = {
   GET_ALL_ORGANIZATIONS,
+  GET_ALL_LOCATIONS,
   GET_SPECIFIC_ORGANIZATION,
+  GET_SPECIFIC_LOCATION,
   ADD_NEW_ORGANIZATION,
   UPDATE_ORGANIZATION,
   DELETE_ORGANIZATION,
