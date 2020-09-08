@@ -10,7 +10,7 @@ router.post('/', auth.checkAuth, paymentController.CREATE_PAYMENT);
 router.patch('/:id', auth.checkAuth, paymentController.UPDATE_PAYMENT);
 router.get('/organizations/:id', auth.checkAuth, paymentController.GET_PAYMENTS_FOR_SPECIFIC_ORGANIZATION);
 router.delete('/:id', auth.checkAuth, paymentController.DELETE_PAYMENT);
-router.post('/2c2p', auth.checkAuth, paymentController.TESTPOST);
-router.post('/2c2p/get', auth.checkAuth, paymentController.GETPAYMENTACTION);
+router.post('/2c2p', paymentController.TESTPOST);
+router.post('/2c2p/get', paymentController.GETPAYMENTACTION);
 
 module.exports = router;

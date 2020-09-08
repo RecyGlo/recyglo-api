@@ -12,6 +12,7 @@ const Payment = require('../models/payment');
 const TEST = async (req, res) => res.status(200).send('Welcome to Recyglo API');
 
 const TESTPOST = async (req, res) => {
+  console.log('test payment action');
   console.log(req);
   res.redirect('http://localhost:5000/thankyou');
   // res.status(200).send('Welcome to Recyglo API');
@@ -19,6 +20,7 @@ const TESTPOST = async (req, res) => {
 
 const GETPAYMENTACTION = async (req, res) => {
   console.log('get payment action');
+  console.log(req);
   // res.redirect('http://localhost:5000/thankyou');
   res.status(200).send('Welcome to Payment API');
 };
