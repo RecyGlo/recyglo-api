@@ -14,13 +14,34 @@ const TEST = async (req, res) => res.status(200).send('Welcome to Recyglo API');
 const TESTPOST = async (req, res) => {
   console.log('test payment action');
   console.log(req);
-  res.redirect('http://localhost:5000/thankyou');
+  res.redirect('https://recyglo.info/thankyou');
   // res.status(200).send('Welcome to Recyglo API');
 };
 
 const GETPAYMENTACTION = async (req, res) => {
   console.log('get payment action');
-  console.log(req);
+  console.log(req.body);
+  '0E209179A3A12BD87ADFF2ED48103F778E6E1961B83884B2A12B9269E51284D7'
+  '0E209179A3A12BD87ADFF2ED48103F778E6E1961B83884B2A12B9269E51284D7'
+  const {
+    order_id,
+    currency,
+    amount,
+    transaction_ref,
+    approval_code,
+    eci,
+    transaction_datetime,
+    payment_channel,
+    payment_status,
+    process_by,
+    channel_response_code,
+    channel_response_desc,
+    masked_pan,
+    hash_value,
+    paid_channel,
+    paid_agent,
+  } = req.body;
+
   // res.redirect('http://localhost:5000/thankyou');
   res.status(200).send('Welcome to Payment API');
 };
