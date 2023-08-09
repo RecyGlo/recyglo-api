@@ -46,11 +46,11 @@ const checkAuth = (req, res, next) => {
     req.userData = decodedToken;
     next();
   } catch (error) {
+    return res.status(401).json({
+      message: 'You do not have access to the API',
+    });
     // temporary fixing for 401 error
-    // return res.status(401).json({
-    //   message: 'You do not have access to the API',
-    // });
-    return next();
+    // return next();
   }
 };
 
