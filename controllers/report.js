@@ -108,6 +108,40 @@ const GET_SPECIFIC_REPORT = async (req, res) => {
   }
 };
 
+// const ADD_NEW_REPORT = async (req, res) => {
+//   const { body } = req;
+
+//   const schema = {
+//     organization: joi.string().required(),
+//     title: joi.string().required(),
+//     data: joi.string().required(),
+//   };
+
+//   const { error } = joi.validate(body, schema);
+
+
+//   if (!error) {
+//     const newReport = new Report(req.body);
+//     newReport.save(async (err, report) => {
+//       // eslint-disable-next-line no-underscore-dangle
+//       const l = await Report.findOne({ _id: report._id })
+//         .populate('organization')
+//         .sort({ createdAt: -1 })
+//         .lean()
+//         .exec();
+//       return res.status(201).send({
+//         data: l,
+//         message: 'Success',
+//       });
+//     });
+//   }
+//   const err = [];
+//   err.push({ msg: error.message });
+//   return res.status(500).send({
+//     error: err,
+//   });
+// };
+
 const ADD_NEW_REPORT = async (req, res) => {
   const { body } = req;
 
@@ -119,27 +153,32 @@ const ADD_NEW_REPORT = async (req, res) => {
 
   const { error } = joi.validate(body, schema);
 
-
   if (!error) {
     const newReport = new Report(req.body);
-    newReport.save(async (err, report) => {
-      // eslint-disable-next-line no-underscore-dangle
-      const l = await Report.findOne({ _id: report._id })
+
+    try {
+      const savedReport = await newReport.save();
+      const populatedReport = await Report.findOne({ _id: savedReport._id })
         .populate('organization')
         .sort({ createdAt: -1 })
         .lean()
         .exec();
+
       return res.status(201).send({
-        data: l,
+        data: populatedReport,
         message: 'Success',
       });
+    } catch (err) {
+      return res.status(500).send({
+        error: [{ msg: 'An error occurred while saving the report.' }],
+      });
+    }
+  } else {
+    const errMessages = [{ msg: error.message }];
+    return res.status(400).send({
+      error: errMessages,
     });
   }
-  const err = [];
-  err.push({ msg: error.message });
-  return res.status(500).send({
-    error: err,
-  });
 };
 
 module.exports = {

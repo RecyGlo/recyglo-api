@@ -95,7 +95,7 @@ const SEND_EMAIL = async (email) => {
 
   return new Promise((resolve,reject)=>{
 
-    message = '<html><p>We heard that you lost your RecyGlo password. Sorry about that!</p><p>But don’t worry! You can use the following link to reset your password:</p><p>https://recyglo.info/password_reset/'+cypher+'</p><p>If you don’t use this link within 3 hours, it will expire. To get a new password reset link, visit https://recyglo.info/password_reset</p></html>';
+    message = '<html><p>We heard that you lost your RecyGlo password. Sorry about that!</p><p>But don’t worry! You can use the following link to reset your password:</p><p>https://recyglo.net/password_reset/'+cypher+'</p><p>If you don’t use this link within 3 hours, it will expire. To get a new password reset link, visit https://recyglo.net/password_reset</p></html>';
     client.send(
       {
         text: 'Hello',

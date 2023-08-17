@@ -14,7 +14,7 @@ const TEST = async (req, res) => res.status(200).send('Welcome to Recyglo API');
 const TESTPOST = async (req, res) => {
   console.log('test payment action');
   console.log(req);
-  res.redirect('https://recyglo.info/thankyou');
+  res.redirect('https://recyglo.net/thankyou');
   // res.status(200).send('Welcome to Recyglo API');
 };
 
